@@ -55,7 +55,7 @@ app.use(
 );
 
 
-app.get("/", async (req, res) => {
+app.get("/", async (req, res, next) => {
  try {
   const summary = await axios.get(`${API_URL}/total`);
   res.render("home", {
@@ -81,15 +81,7 @@ app.get("/user", requiresAuth(), async (req, res) => {
 
 app.get("/expenses", requiresAuth(), async (req, res, next) => {
  try {
-  // 👇 get the token from the request 👇
-  const { token_type, access_token } = req.oidc.accessToken;
-  // 👇 then send it as an authorization header 👇
-  const expenses = await axios.get(`${API_URL}/reports`, {
-   headers: {
-    Authorization: `${token_type} ${access_token}`,
-   },
-  });
-  // 👆 end of changes 👆
+  const expenses = await axios.get(`${API_URL}/reports`);
   res.render("expenses", {
    user: req.oidc && req.oidc.user,
    expenses: expenses.data,
@@ -98,6 +90,7 @@ app.get("/expenses", requiresAuth(), async (req, res, next) => {
   next(err);
  }
 });
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
